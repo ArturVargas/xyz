@@ -139,7 +139,18 @@ export default function LandingPage() {
       const tx = await contract?.createBoat(name);
       console.log("Transaction sent:", tx.hash);
       await tx.wait();
-      setShipsTable([...shipsTable, { name: name, status: "ON", address: tx.hash }])
+
+      // Obtener el último ID de barco creado
+      const boatCount = await contract?.getBoatCount();
+      console.log("Total boats:", boatCount?.toString());
+      
+      const lastIndex = Number(boatCount) - 1;
+
+      // Obtener la dirección del barco usando el ID
+      const boatAddress = await contract?.getBoatById(lastIndex);
+      console.log("New boat address:", boatAddress);
+
+      setShipsTable([...shipsTable, { name: name, status: "ON", address: boatAddress }])
       console.log("Transaction confirmed");
       setHasShips(true)
     } catch (error) {
@@ -236,7 +247,7 @@ export default function LandingPage() {
         hash: fileHash,
         description: rwaDescription,
         fileUrl: `ipfs://${fileHash}`,
-        txId: "0x...",
+        txId: receipt.hash.slice(0, 6) + "..." + receipt.hash.slice(-4),
       });
       
       // Mostrar modal de éxito
